@@ -11,22 +11,9 @@ import ComposableArchitecture
 
 @main
 struct CustomFoodsApp: App {
-    let persistenceController = PersistenceController.shared
-    
     var body: some Scene {
         WindowGroup {
-            MainView(foodData: FoodData(),
-                     storeMenuView: Store(
-                        initialState: MenuDomainState(),
-                        reducer: MenuDomainReducer,
-                        environment: MenuDomainEnvironment()
-                     ),
-                     storeMainView: Store(
-                        initialState: MainDomainState(),
-                        reducer: MainDomainReducer,
-                        environment: MainDomainEnvironment()
-                     )
-            )
+            MainView()
         }
     }
 }

@@ -6,48 +6,44 @@
 //
 
 import SwiftUI
+import CoreData
 import ComposableArchitecture
-
+import simd
 
 struct MenuView: View {
     let store: Store<MenuDomainState, MenuDomainAction>
-    
+            
     var body: some View {
-        WithViewStore(self.store) { viewStore in
-            NavigationView {
+        NavigationView {
+            WithViewStore(self.store) { viewStore in
                 List {
                     ForEach(viewStore.sections) { section in
                         Section(header: Text(section.sectionType.rawValue)) {
                             ForEach(section.items) { menuItem in
-                                if menuItem.label == StringConstants.customFoodsLabel {
+                                if menuItem.label == "Custom Foods" {
                                     NavigationLink(
                                         destination: FoodsListView(
                                             store: Store(
-                                                initialState: FoodsListViewDomainState(),
-                                                reducer: foodsListViewDomainReducer,
-                                                environment: FoodsListViewDomainEnvironment()
+                                                initialState: FoodsListDomainState(),
+                                                reducer: FoodsListDomainReducer,
+                                                environment: FoodsListDomainEnvironment()
                                             )
                                         )
                                     ) {
                                         MenuRowView(label: menuItem.label, icon: menuItem.icon)
                                     }
                                 } else {
-                                    NavigationLink(
-                                        destination: ListRowView(labelContent: menuItem.label)
-                                    ) {
-                                        MenuRowView(label: menuItem.label, icon: menuItem.icon)
-                                    }
+                                    MenuRowView(label: menuItem.label, icon: menuItem.icon)
                                 }
                             }
                         }
                     }
-                }.listStyle(.grouped)
-                .navigationBarTitle(StringConstants.menuLabel)
-            }.foregroundColor(Color.black)
-            .navigationViewStyle(StackNavigationViewStyle())
+                }.listStyle(.grouped).navigationBarTitle("Menu")
+            }
         }
     }
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
@@ -60,3 +56,13 @@ struct ContentView_Previews: PreviewProvider {
         )
     }
 }
+
+/*
+FoodsListView(
+store: Store(
+    initialState: FoodsListDomainState(),
+    reducer: FoodsListDomainReducer,
+    environment: FoodsListDomainEnvironment()
+)
+) */
+

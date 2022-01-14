@@ -5,63 +5,46 @@
 //  Created by Carlos Wilson on 11/01/22.
 //
 
-import Foundation
 import SwiftUI
 import ComposableArchitecture
-import Combine
 
 
 struct MenuDomainState: Equatable {
-    var menuItems: [MenuItem] = Menu.menuItems
-    var showAddTodoView = false;
+    var isRootActive = false
     
-    var topMenuItems: [MenuItem] {
-        return [
-            MenuItem(label: "Switch Mode", icon: "switch.2"),
-            MenuItem(label: "Set Temp Basal", icon: "circle.grid.cross"),
-            MenuItem(label: "Hypo Protect", icon: "cross"),
-            MenuItem(label: "Pod", icon: "capsule")
-        ]
-    }
+    var sections: [MenuSection] = [
+        MenuSection(sectionType: .actions, items: [
+            MenuItem(label: StringConstants.switchMode, icon: StringConstants.switchModeIcon),
+            MenuItem(label: StringConstants.setTempBasal, icon: StringConstants.setTempBasalImage),
+            MenuItem(label: StringConstants.hypoProtect, icon: StringConstants.hypoProtectImage),
+            MenuItem(label: StringConstants.pod, icon: StringConstants.podImage),
+            MenuItem(label: StringConstants.enterBG, icon: StringConstants.enterBGImage),
+            MenuItem(label: StringConstants.suspendInsulin, icon: StringConstants.suspendInsulinImage)]),
+        MenuSection(sectionType: .programs, items: [
+            MenuItem(label: StringConstants.basalPrograms),
+            MenuItem(label: StringConstants.tempBasalPresents),
+            MenuItem(label: StringConstants.customFoodsLabel)]),
+        MenuSection(sectionType: .settings, items: [
+            MenuItem(label: StringConstants.editSettings)]),
+    ]
     
-    var middleMenuItems: [MenuItem] {
-        return [
-            MenuItem(label: "Switch Mode", icon: "switch.2"),
-            MenuItem(label: "Set Temp Basal", icon: "circle.grid.cross"),
-            MenuItem(label: "Hypo Protect", icon: "cross"),
-            MenuItem(label: "Pod", icon: "capsule"),
-            MenuItem(label: "Custom Foods", icon: "")
-        ]
-    }
-    
-    var bottomMenuItems: [MenuItem] {
-        return [
-            MenuItem(label: "Switch Mode", icon: "switch.2"),
-            MenuItem(label: "Set Temp Basal", icon: "circle.grid.cross"),
-            MenuItem(label: "Hypo Protect", icon: "cross"),
-            MenuItem(label: "Pod", icon: "capsule")
-        ]
-    }
+    var foodsListDomainState = FoodsListViewDomainState()
 }
 
 enum MenuDomainAction: Equatable {
     case didLinkTap
-    case navigateToFoodListView
+    case navigateToFoodListView(Bool)
 }
 
-struct MenuDomainEnvironment {
-    
-}
+struct MenuDomainEnvironment {}
 
 let MenuDomainReducer = Reducer<MenuDomainState, MenuDomainAction, MenuDomainEnvironment> {
     state, action, _ in
     
     switch action {
     case .didLinkTap:
-            print("Hello")
         return .none
-        
-    case .navigateToFoodListView:
+    case .navigateToFoodListView(let isActive):
         return .none
     }
     

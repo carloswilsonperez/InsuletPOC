@@ -1,76 +1,108 @@
 //
-//  AddFoodView.swift
+//  ResumeInsulin.swift
 //  CustomFoods
 //
-//  Created by Carlos Wilson on 17/12/21.
+//  Created by Carlos Wilson on 01/02/22.
 //
 
 import SwiftUI
+import ComposableArchitecture
+
 
 struct AddFoodView: View {
-    // State for TextFields
-    @State var name: String
-    @State var carbs: String
-        
-    // State for the alert View
-    @State private var showingAlert = false
-    @Environment(\.presentationMode) var presentationMode
     
-    // State for the list of foods
-    @ObservedObject var foodData: FoodData = FoodData()
+    let store: Store<AddFoodViewDomainState, AddFoodViewDomainAction>
     
     var body: some View {
-        VStack {
-            Form(content: {
+        WithViewStore(self.store) { viewStore in
+            VStack {
+                CustomBackButton
+                TitleAddFood
                 
-                Section(header: Text("FOOD NAME")
-                            .foregroundColor(.black)
-                            .font(.headline).bold()) {
-                    TextField("Enter food name", text: $name)
-                }.textCase(nil)
+                Form {
+                    Section(header: Text(StringConstants.foodNameHeader)
+                                .foregroundColor(.black)
+                                .font(.headline).bold()) {
+                        
+                        TextField(StringConstants.foodNamePlaceholder,
+                                  text: viewStore.binding(
+                                    get: { $0.name },
+                                    send: { AddFoodViewDomainAction.nameTextFieldChanged(text: $0) }
+                                  )
+                        )
+                    }.textCase(nil)
+                    
+                    Section(header: Text(StringConstants.foodCarbsHeader)
+                                .foregroundColor(.black)
+                                .font(.headline).bold()
+                    ) {
+                        TextField(StringConstants.foodCarbsPlaceholder,
+                                  text: viewStore.binding(
+                                    get: { $0.carbs },
+                                    send: { AddFoodViewDomainAction.carbsTextFieldChanged(text: $0) }
+                                  )
+                        ).keyboardType(.numberPad)
+                    }.textCase(nil)
+                }
+                Spacer()
                 
-                Section(header: Text("CARBS (g)")
-                            .foregroundColor(.black)
-                            .font(.headline).bold()
-                            ) {
-                    TextField("Enter carb name", text: $carbs)
-                        .keyboardType(.numberPad)
-                }.textCase(nil)
-            })
-            .navigationBarTitle("Add Custom Food")
-            
-            Spacer()
-            Button(action: {
-                showingAlert = true
-            }, label: {
-                Text("Save To Custom Foods")
-                    .fontWeight(.medium)
-                    .font(.headline)
-                    .frame(minWidth: 0, maxWidth: 300, maxHeight: 20)
-                    .padding()
-                    .foregroundColor(Color.white)
-                    .background(Color(red: 98/255, green: 0.0, blue: 234/255))
-                    .cornerRadius(8)
-            })
-            .disabled(name == "")
-            .alert(isPresented: $showingAlert) {
-                Alert(title: Text("Custom Foods"),
-                      message: Text("Your custom fod \(name) for \(carbs)g has been added"),
-                      dismissButton: Alert.Button.default(
-                        Text("Ok"), action: {
-                            // Append new Food item to the foodData.foods array
-                            foodData.addFood(food: Food(name: name, carbohidrates: Int(carbs)!))
-                            self.presentationMode.wrappedValue.dismiss()
-                        }
-                    )
+                
+                Button(action: {
+                    viewStore.send(.tappedSaveCustomFoodButton)
+                }) {
+                    Text(StringConstants.saveToCustomFoods)
+                        .fontWeight(.medium)
+                        .font(.headline)
+                }
+                .buttonStyleReusable(withBackground: viewStore.addFoodButonBackgroundColor)
+                .alert(
+                    self.store.scope(state: { $0.alert }),
+                    dismiss: .justForTest
                 )
             }
+            .navigationBarTitle(StringConstants.addFoodBarTitle, displayMode: .automatic)
+            .navigationBarHidden(true)
+            .padding(.bottom)
+        }
+    }
+    
+    private var TitleAddFood : some View {
+        HStack {
+            Text(StringConstants.addFoodBarTitle)
+                .font(.system(size: 32.0))
+                .fontWeight(.bold)
+            Spacer()
+        }.padding(.leading)
+    }
+    
+    private var CustomBackButton : some View {
+        WithViewStore(self.store){ viewStore in
+            
+            Button(action:{
+                viewStore.send(.justForTest)
+            }, label: {
+                HStack {
+                    Image(systemName: StringConstants.chevronLeft)
+                        .foregroundColor(.blue)
+                        .imageScale(.large)
+                    Text(StringConstants.backLabel)
+                        .foregroundColor(.blue)
+                    Spacer()
+                }
+            })
+                .padding([.leading,.top,.bottom], 10)
         }
     }
 }
 
 struct AddFoodView_Previews: PreviewProvider {
     static var previews: some View {
-        AddFoodView(name: "", carbs: "", foodData: FoodData())
+        AddFoodView(store: Store(
+            initialState: AddFoodViewDomainState(),
+            reducer: addFoodViewDomainReducer,
+            environment: AddFoodViewDomainEnvironment()))
     }
 }
+
+
+

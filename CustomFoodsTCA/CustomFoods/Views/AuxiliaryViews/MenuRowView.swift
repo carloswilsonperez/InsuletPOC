@@ -9,18 +9,17 @@ import SwiftUI
 
 struct MenuRowView: View {
     var label: String
-    var icon: String
-    @State private var offsetX = 0
+    var icon: String?
     
     var body: some View {
         HStack {
-            if icon != "" {
+            if let icon = icon {
                 MenuIconView(icon: icon)
             }
             Text(label)
                 .fontWeight(.bold)
-                .padding()
-                .offset(x: icon != "" ? 0 : -15)
+                
+            Spacer()
         }
     }
 }

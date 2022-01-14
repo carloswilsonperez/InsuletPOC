@@ -1,105 +1,79 @@
 //
-//  MenuView.swift
+//  MenuFormView.swift
 //  CustomFoods
 //
-//  Created by Carlos Wilson on 17/12/21.
+//  Created by Carlos Wilson on 01/02/22.
 //
 
 import SwiftUI
-
-struct Todo: Identifiable{
-    let id = UUID()
-    let name: String
-    let category: String
-}
+import ComposableArchitecture
 
 struct FoodsListView: View {
-    
-    @State private var showAddTodoView = false
-    @EnvironmentObject var foodData: FoodData
-    
-    init() {
-        UITableViewCell.appearance().backgroundColor = .white
-        UITableView.appearance().backgroundColor = .white
-    }
+    let store: Store<FoodsListViewDomainState, FoodsListViewDomainAction>
     
     var body: some View {
         VStack {
-            List{
-                ForEach(foodData.foods){ food in
-                    HStack{
-                        Text(food.name)
-                        Spacer()
-                        Text("\(food.carbohidrates) g")
-                            .foregroundColor(Color.purple)
+            WithViewStore(self.store) { viewStore in
+                if viewStore.state.foods.count > 0 {
+                    List {
+                        ForEach(viewStore.state.foods){ food in
+                            HStack{
+                                Text(food.name)
+                                Spacer()
+                                Text("\(food.carbohidrates) \(StringConstants.grams)")
+                                    .foregroundColor(Color.purple)
+                            }
+                        }
+                        .onDelete(perform: { indexSet in
+                            viewStore.send(.delete(at: indexSet))
+                        })
+                        .onMove(perform: { from, to in
+                            viewStore.send(.move(from, to))
+                        })
                     }
-                    .listRowSeparator(.hidden)
-                    Divider()
+                    .listStyle(.plain)
+                    Spacer()
+                } else {
+                    Spacer()
+                    Text(StringConstants.noFoodsMessage).foregroundColor(.gray)
+                    Spacer()
                 }
-                .onDelete(perform: { indexSet in
-                    foodData.foods.remove(atOffsets: indexSet)
-                })
-                .onMove(perform: { indices, newOffset in
-                    foodData.foods.move(fromOffsets: indices, toOffset: newOffset)
-                })
-            }
-            Spacer()
-            NavigationLink(destination: AddFoodView(name: "", carbs: "", foodData: foodData)) {
-                Text("Add Custom Food")
-                    .fontWeight(.medium)
-                    .font(.headline)
-                    .frame(minWidth: 0, maxWidth: 300, maxHeight: 20)
-                    .padding()
-                    .foregroundColor(Color.white)
-                    .background(Color(red: 98/255, green: 0.0, blue: 234/255))
-                    .cornerRadius(8)
+                
+                NavigationLink(
+                    isActive: viewStore.binding(
+                        get: \.isRootActive,  // Toggle to show/hide the AddFoodView
+                        send: FoodsListViewDomainAction.navigateToAddFoodView(isActive:)
+                    ),
+                    
+                    destination: {
+                        AddFoodView.init(store: self.store.scope(
+                            state: \.addFoodViewConfigState,
+                            action: FoodsListViewDomainAction.loadedAddFoodAction
+                        ))
+                    }) {
+                        Button(action: {
+                            viewStore.send(.navigateToAddFoodView(isActive: true)) // Move to AddFoodView
+                        }) {
+                            Text(StringConstants.addCustomFood)
+                        }.buttonStyleReusable(withBackground: viewStore.activeColor)
+                        .padding()
+                    }
             }
         }
         .background(Color.white)
-        .navigationBarTitle("Custom Foods")
+        .navigationBarTitle(StringConstants.customFoodsLabel)
         .navigationBarItems(trailing: EditButton())
     }
-    /*
-     struct AddTodoView: View {
-     @Binding var showAddTodoView: Bool
-     
-     @State private var name: String = ""
-     @State private var selectedCategory = 0
-     var categoryTypes = ["family","personal","work"]
-     
-     @Binding var todos: [Todo]
-     
-     var body: some View {
-     
-     VStack{
-     Text("Add Todo").font(.largeTitle)
-     TextField("To Do name",text: $name)
-     .textFieldStyle(RoundedBorderTextFieldStyle())
-     .border(Color.black).padding()
-     
-     Text("Select Category")
-     Picker("",selection: $selectedCategory){
-     ForEach(0 ..< categoryTypes.count){
-     Text(self.categoryTypes[$0])
-     }
-     }.pickerStyle(SegmentedPickerStyle())
-     
-     }.padding()
-     
-     Button(action: {
-     self.showAddTodoView = false
-     todos.append(Todo(name: name, category: categoryTypes[selectedCategory]))
-     },
-     label: {
-     Text("Done")
-     })
-     }
-     }
-     
-     */
 }
-struct MenuView_Previews: PreviewProvider {
+
+struct FoodsListView_Previews: PreviewProvider {
     static var previews: some View {
-        FoodsListView().environmentObject(FoodData())
+        FoodsListView(
+            store:Store(
+                initialState: FoodsListViewDomainState(),
+                reducer: foodsListViewDomainReducer,
+                environment: FoodsListViewDomainEnvironment()
+            )
+        )
     }
 }
