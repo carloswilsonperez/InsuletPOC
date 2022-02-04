@@ -57,7 +57,7 @@ struct AddFoodView: View {
                 .buttonStyleReusable(withBackground: viewStore.addFoodButonBackgroundColor)
                 .alert(
                     self.store.scope(state: { $0.alert }),
-                    dismiss: .justForTest
+                    dismiss: .doNothing
                 )
             }
             .navigationBarTitle(StringConstants.addFoodBarTitle, displayMode: .automatic)
@@ -79,7 +79,7 @@ struct AddFoodView: View {
         WithViewStore(self.store){ viewStore in
             
             Button(action:{
-                viewStore.send(.justForTest)
+                viewStore.send(.doNothing)
             }, label: {
                 HStack {
                     Image(systemName: StringConstants.chevronLeft)

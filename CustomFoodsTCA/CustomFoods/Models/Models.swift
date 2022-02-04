@@ -81,4 +81,8 @@ struct StringConstants {
     
     static let chevronLeft = "chevron.left"
     static let backLabel = "Back"
+    static let yourFood = "Your custom food"
+    static let forLabel = "for"
+    static let hasBeenAdded = "g has been added"
+    static let ok = "Ok"
 }

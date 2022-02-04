@@ -52,7 +52,7 @@ struct FoodsListView: View {
                         ))
                     }) {
                         Button(action: {
-                            viewStore.send(.navigateToAddFoodView(isActive: true)) // Move to AddFoodView
+                            viewStore.send(.navigateToAddFoodView(isActive: true))
                         }) {
                             Text(StringConstants.addCustomFood)
                         }.buttonStyleReusable(withBackground: viewStore.activeColor)
@@ -60,7 +60,6 @@ struct FoodsListView: View {
                     }
             }
         }
-        .background(Color.white)
         .navigationBarTitle(StringConstants.customFoodsLabel)
         .navigationBarItems(trailing: EditButton())
     }

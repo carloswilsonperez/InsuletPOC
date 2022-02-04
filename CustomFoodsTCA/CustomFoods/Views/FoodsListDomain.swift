@@ -76,9 +76,9 @@ let foodsListViewDomainReducer = Reducer<FoodsListViewDomainState, FoodsListView
                         state.isRootActive = false
                         return .none
                         
-                    case .popToRootView:
-                        state.isRootActive = false
-                        return .none
+                case .emptyGoBack:
+                    state.isRootActive = false
+                    return .none
                         
                     default:
                         return .none

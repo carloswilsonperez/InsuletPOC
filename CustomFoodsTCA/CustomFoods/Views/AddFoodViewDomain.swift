@@ -20,8 +20,8 @@ enum AddFoodViewDomainAction: Equatable {
     case tappedSaveCustomFoodButton
     case alertOkTapped
     case addFood(Food)
-    case popToRootView
-    case justForTest
+    case doNothing
+    case emptyGoBack
     
     case nameTextFieldChanged(text: String)
     case carbsTextFieldChanged(text: String)
@@ -35,14 +35,15 @@ let addFoodViewDomainReducer = Reducer<AddFoodViewDomainState,AddFoodViewDomainA
     switch action {
     case .tappedSaveCustomFoodButton:
         state.alert = .init(
-            title: TextState("Custom Foods"),
-            message: TextState("Your custom food \"\(state.name)\" for \(state.carbs)g has been added"),
-            dismissButton: .default(TextState("Ok"), send: .alertOkTapped)
+            title: TextState(StringConstants.customFoodsLabel),
+            message: TextState("\(StringConstants.yourFood) \"\(state.name)\" \(StringConstants.forLabel) \(state.carbs)\(StringConstants.hasBeenAdded)"),
+            dismissButton: .default(TextState(StringConstants.ok), send: .alertOkTapped)
         )
         return .none
         
     case .alertOkTapped:
         state.alert = nil
+       
         let food = Food(
             name: state.name,
             carbohidrates: state.carbs
@@ -51,13 +52,9 @@ let addFoodViewDomainReducer = Reducer<AddFoodViewDomainState,AddFoodViewDomainA
         state.carbs = ""
         return Effect(value: .addFood(food))
         
-    case .popToRootView:
-        print("addFoodViewDomain: popToRootView")
-        return .none
-        
     case .nameTextFieldChanged(let text):
-        state.name = text
         print("addFoodViewDomain: .nameTextFieldChanged")
+        state.name = text
         state.addFoodButonBackgroundColor = getButtonTint(state.name, state.carbs)
         return .none
         
@@ -67,9 +64,9 @@ let addFoodViewDomainReducer = Reducer<AddFoodViewDomainState,AddFoodViewDomainA
         state.addFoodButonBackgroundColor = getButtonTint(state.name, state.carbs)
         return .none
         
-    case .justForTest:
-        print("Testing")
-        return Effect(value: .popToRootView)
+    case .doNothing:
+        print("addFoodViewDomain: .doNothing")
+        return Effect(value: .emptyGoBack)
         
     default:
         return .none
